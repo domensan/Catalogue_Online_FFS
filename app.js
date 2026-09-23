@@ -68,6 +68,11 @@
     flip.on('changeOrientation', update);
     preload(0);
     flip.loadFromHTML(elements);
+    // showCover preserves single-page covers but forces them rigid by default.
+    for (const index of [0, pages.length - 1]) {
+      flip.getPage(index).setDensity('soft');
+      flip.getPage(index).setDrawingDensity('soft');
+    }
     message.hidden = true;
     previous.addEventListener('click', () => flip.flipPrev());
     next.addEventListener('click', () => flip.flipNext());
