@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172526">
+  <title>Catálogo FFS 2027</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="vendor/page-flip.browser.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="./" aria-label="Catálogo FFS, inicio">FFS<span>CATÁLOGO / 2027</span></a><span class="edition">EDICIÓN DIGITAL</span></header>
+  <main>
+    <div class="viewer" id="viewer" aria-label="Visor del catálogo">
+      <div id="book"></div>
+      <p id="message" role="status">Cargando catálogo…</p>
+    </div>
+    <nav aria-label="Navegación del catálogo">
+      <button id="previous" type="button" aria-label="Página anterior" disabled>← <span>Anterior</span></button>
+      <output id="counter" aria-live="polite" aria-atomic="true">Cargando…</output>
+      <button id="next" type="button" aria-label="Página siguiente" disabled><span>Siguiente</span> →</button>
+    </nav>
+    <p class="hint">Arrastra una esquina o usa las flechas para pasar de página.</p>
+    <noscript>Activa JavaScript para utilizar el visor del catálogo.</noscript>
+  </main>
+</body>
+</html>
