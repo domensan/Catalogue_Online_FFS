@@ -59,7 +59,7 @@ Los botones tienen etiquetas accesibles, el contador anuncia la página actual y
 
 Pulsa **Review mode**, espera que carguen los comentarios y selecciona un punto de la página. Escribe tu nombre y comentario, y pulsa **Save**. El visor confirma el guardado solo cuando Apps Script responde correctamente. **Refresh comments** recupera las notas de otros revisores. No hay actualización en tiempo real.
 
-Los comentarios se guardan en la pestaña **Comments** de la planilla privada del propietario. Cualquier visitante del catálogo puede leerlos y agregar notas; los nombres son declarados, no verificados. Las notas publicadas son de solo lectura en el catálogo. El propietario puede corregirlas, eliminar filas o cambiar **Status** a **Resolved** (resuelto) u **Open** (pendiente) directamente en Sheets. No cambiar los encabezados ni los IDs. Las posiciones X/Y son proporciones entre 0 y 1.
+Los comentarios se guardan en la pestaña **Comments** de la planilla privada del propietario. Cualquier visitante del catálogo puede leerlos y agregar notas; los nombres son declarados, no verificados. Las notas publicadas son de solo lectura, salvo **Delete comment**, disponible únicamente en el navegador que creó la nota. La propiedad se verifica con una clave aleatoria de 256 bits guardada localmente; el servidor conserva solo su hash SHA-256 en la columna **Owner hash**, que nunca devuelve al catálogo. Borrar el almacenamiento del navegador pierde esa capacidad: el propietario de la planilla todavía puede eliminar la fila manualmente. El nombre no da permiso para borrar. El propietario puede corregirlas, eliminar filas o cambiar **Status** a **Resolved** (resuelto) u **Open** (pendiente) directamente en Sheets. No cambiar los encabezados, los IDs ni los hashes de propiedad. Las posiciones X/Y son proporciones entre 0 y 1.
 
 La planilla es https://docs.google.com/spreadsheets/d/1LMfiDG1WuCj6wvtCitj4_iDcCddZ72R1o2OqZFYkLA4/edit. La URL pública de Apps Script está en `review.js`. El código desplegado se conserva en `apps-script/Code.gs`; este archivo no se incluye en `_site/`. La aplicación web se despliega en Apps Script con **Execute as: Me** y **Who has access: Anyone**. Los cambios al código del servidor requieren actualizar la versión del despliegue en Apps Script; el push a GitHub solo publica el visor.
 
@@ -68,3 +68,12 @@ Si falla el envío, el texto permanece en el diálogo. **Retry save** reenvía e
 Al terminar la revisión se puede archivar el despliegue de Apps Script y conservar la planilla. El servidor valida páginas 1–48; si se agregan más páginas, actualizar ese límite en `validate_` y desplegar una nueva versión. Reemplazar imágenes con otra composición puede cambiar a qué contenido apunta una anotación anterior.
 
 Pruebas: `node scripts/check-apps-script.cjs` valida el servidor con dobles locales; `node scripts/check-review.cjs` prueba el flujo del navegador con respuestas simuladas, sin escribir en Sheets (requiere Playwright y servidor local en 8765).
+
+### Actualizar a eliminación por autor y empezar de cero
+
+1. Reemplazar el contenido de Code.gs en Apps Script por `apps-script/Code.gs` y guardar.
+2. Ejecutar **resetComments** desde el editor: agrega la columna Owner hash y borra TODOS los comentarios existentes, conservando encabezados y otras pestañas. Esta función no está expuesta en el servicio público. No volver a ejecutarla salvo que se quiera vaciar nuevamente la revisión.
+3. En **Deploy → Manage deployments**, editar el despliegue actual y seleccionar **New version → Deploy**. Conservar **Execute as: Me** y **Anyone**. La URL /exec debe seguir siendo la misma.
+4. Publicar el visor actualizado tras verificar que el servicio responde con `version: 2`.
+
+**setup** actualiza la estructura sin borrar comentarios. **resetComments** sí los elimina. El botón de borrado solicita confirmación y espera la respuesta del servidor antes de retirar el marcador. Reintentar un borrado no afecta otras filas.

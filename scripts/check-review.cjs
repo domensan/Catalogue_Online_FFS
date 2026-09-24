@@ -8,15 +8,23 @@ const assert = require('node:assert/strict');
       const stored = [];
       let failNext = true;
       const sent = [];
+      const tokens = new Map();
       await context.route('https://script.google.com/macros/s/**', async route => {
         if (route.request().method() === 'POST') {
           const note = route.request().postDataJSON();
+          if (note.action === 'delete') {
+            if (tokens.get(note.id) !== note.ownerToken) return route.fulfill({json:{ok:false}});
+            const index = stored.findIndex(n => n.id === note.id);
+            if (index !== -1) stored.splice(index, 1);
+            return route.fulfill({json:{ok:true, id:note.id, deleted:true}});
+          }
+          tokens.set(note.id, note.ownerToken);
           sent.push(note);
-          if (!stored.some(n => n.id === note.id)) stored.push({ ...note, createdAt: '2026-09-24T12:00:00Z' });
+          if (!stored.some(n => n.id === note.id)) stored.push({ id:note.id, page:note.page, x:note.x, y:note.y, name:note.name, text:note.text, createdAt: '2026-09-24T12:00:00Z' });
           if (failNext) { failNext = false; return route.abort(); }
           return route.fulfill({ json: { ok: true, id: note.id } });
         }
-        return route.fulfill({ json: { ok: true, comments: stored } });
+        return route.fulfill({ json: { ok: true, version: 2, comments: stored } });
       });
       const page = await context.newPage();
       const errors = [];
@@ -48,6 +56,25 @@ const assert = require('node:assert/strict');
       await page.waitForFunction(() => !document.querySelector('.review-pin'));
       await page.locator('#previous').click();
       await page.locator('.review-pin').waitFor();
+      // A different browser can read the note but must not offer deletion.
+      const strangerContext = await browser.newContext();
+      await strangerContext.route('https://script.google.com/macros/s/**', route => route.fulfill({json:{ok:true, version:2, comments:stored}}));
+      const stranger = await strangerContext.newPage();
+      await stranger.goto('http://127.0.0.1:8765');
+      await stranger.locator('#review-toggle').click();
+      await stranger.locator('.review-pin').click();
+      assert(await stranger.locator('[data-action="delete"]').isHidden());
+      await strangerContext.close();
+      await page.locator('.review-pin').click();
+      assert(await page.locator('[data-action="delete"]').isVisible());
+      page.once('dialog', dialog => dialog.accept());
+      await page.getByRole('button', {name:'Delete comment', exact:true}).click();
+      await page.waitForFunction(() => document.querySelector('#review-status').textContent.startsWith('Comment deleted'));
+      assert.equal(stored.length, 0);
+      await page.reload();
+      await page.locator('#review-toggle').click();
+      await page.waitForFunction(() => document.querySelector('#review-status').textContent.startsWith('Shared comments'));
+      assert.equal(await page.locator('.review-pin').count(), 0);
       assert.deepEqual(errors, []);
       console.log(`PASS shared review ${width}px: save, retry, no duplicates, reload, status, navigation`);
       await context.close();
