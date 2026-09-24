@@ -19,8 +19,10 @@ main { position: relative; padding: 24px 20px 16px; }
 #message { position: absolute; max-width: 80%; text-align: center; }
 #message[hidden] { display: none; }
 nav { display: flex; align-items: center; justify-content: center; gap: 28px; margin-top: 22px; }
-button { border: 1px solid #b8c3bc; border-radius: 30px; background: transparent; color: inherit; padding: 12px 20px; min-height: 44px; font: inherit; font-size: 13px; cursor: pointer; }
-button:hover:enabled { color: white; background: #172526; border-color: #172526; }
+button, .button-link { border: 1px solid #b8c3bc; border-radius: 30px; background: transparent; color: inherit; padding: 12px 20px; min-height: 44px; font: inherit; font-size: 13px; cursor: pointer; }
+button:hover:enabled, .button-link:hover { color: white; background: #172526; border-color: #172526; }
+.button-link { display: inline-flex; align-items: center; text-decoration: none; white-space: nowrap; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
 button:disabled { opacity: .35; cursor: default; }
 button:focus-visible, a:focus-visible { outline: 3px solid #347857; outline-offset: 4px; }
 output { min-width: 130px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; }
@@ -31,7 +33,7 @@ output { min-width: 130px; text-align: center; font-size: 13px; font-variant-num
   main { position: relative; padding: 18px 12px 12px; }
   .viewer { height: max(240px, calc(100dvh - 208px)); }
   nav { gap: 14px; }
-  button { padding: 10px 14px; }
+  button, .button-link { padding: 10px 14px; }
   button span { display: none; }
   .hint { font-size: 10px; }
 }
@@ -53,7 +55,7 @@ output { min-width: 130px; text-align: center; font-size: 13px; font-variant-num
 .note-actions button { padding: 8px 12px; }
 .note-actions [hidden] { display: none; }
 .note-error { font-size: 13px; color: #a32c17; }
-@media (max-width: 600px) { .brand span { display: none; } #review-toggle { font-size: 12px; } }
+@media (max-width: 600px) { .brand span { display: none; } #review-toggle, .button-link { font-size: 12px; } .header-actions { gap: 6px; } }
 
 .review-refresh { display: block; margin: 10px auto 0; }
 .review-refresh[hidden] { display: none; }

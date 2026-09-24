@@ -1,6 +1,6 @@
 # Catálogo FFS 2027
 
-Visor estático de las 48 páginas originales: animación de libro con StPageFlip, arrastre, botones, flechas del teclado, doble página en escritorio y página individual en móvil. No requiere frameworks, npm ni servidor de aplicación.
+Visor estático de las 48 páginas originales: animación de libro con StPageFlip, arrastre, botones, flechas del teclado, botón **Cover** (o tecla Inicio) para volver a la portada, doble página en escritorio y página individual en móvil. No requiere frameworks, npm ni servidor de aplicación.
 
 ## Ejecutar localmente
 
@@ -36,6 +36,10 @@ git add img pages.json
 git commit -m "Actualizar páginas del catálogo"
 git push origin main
 ```
+
+## PDF descargable
+
+El botón **Download PDF** descarga el único archivo `.pdf` de la raíz del proyecto (actualmente `Cat_FFS_2027_V3.pdf`). El generador lo publica siempre como `FFS_Catalog_2027.pdf`, así que para actualizarlo basta reemplazar el PDF (puede tener otro nombre) y hacer push; no hay que tocar el HTML. `scripts/check.py` falla si no hay PDF o si hay más de uno.
 
 ## GitHub Pages
 

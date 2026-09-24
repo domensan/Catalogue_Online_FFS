@@ -11,7 +11,7 @@
   <script src="app.js" defer></script>
 </head>
 <body>
-  <header><a class="brand" href="./" aria-label="FFS catalog home">FFS<span>CATALOG / 2027</span></a><button id="review-toggle" type="button" aria-pressed="false" disabled>Review mode</button></header>
+  <header><a class="brand" href="./" aria-label="FFS catalog home">FFS<span>CATALOG / 2027</span></a><div class="header-actions"><a class="button-link" href="FFS_Catalog_2027.pdf" download>Download PDF</a><button id="review-toggle" type="button" aria-pressed="false" disabled>Review mode</button></div></header>
   <main>
     <section id="catalog-intro" class="catalog-intro" aria-labelledby="intro-title" hidden tabindex="0">
       <h1 id="intro-title">FFS 2027 Catalog, Work in Progress</h1>
@@ -37,6 +37,7 @@
       <p id="message" role="status">Loading catalog…</p>
     </div>
     <nav aria-label="Catalog navigation">
+      <button id="first" type="button" aria-label="Go to cover" disabled>⇤ <span>Cover</span></button>
       <button id="previous" type="button" aria-label="Previous page" disabled>← <span>Previous</span></button>
       <output id="counter" aria-live="polite" aria-atomic="true">Loading…</output>
       <button id="next" type="button" aria-label="Next page" disabled><span>Next</span> →</button>

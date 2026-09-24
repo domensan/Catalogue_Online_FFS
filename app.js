@@ -3,6 +3,7 @@
   const book = document.querySelector('#book');
   const viewer = document.querySelector('#viewer');
   const message = document.querySelector('#message');
+  const first = document.querySelector('#first');
   const previous = document.querySelector('#previous');
   const next = document.querySelector('#next');
   const counter = document.querySelector('#counter');
@@ -66,7 +67,7 @@
       intro.hidden = index !== 0;
       preload(index);
       counter.textContent = `Page ${index + 1} of ${pages.length}`;
-      previous.disabled = index === 0;
+      first.disabled = previous.disabled = index === 0;
       const lastVisible = index + (flip.getOrientation() === 'landscape' && index > 0 ? 1 : 0);
       next.disabled = lastVisible >= pages.length - 1;
     }
@@ -85,12 +86,17 @@
     const review = setupReview({ flip, pages, viewer, book });
     previous.addEventListener('click', () => review.active() ? flip.turnToPrevPage() : flip.flipPrev());
     next.addEventListener('click', () => review.active() ? flip.turnToNextPage() : flip.flipNext());
+    // A single animated turn straight to the cover, however far in the reader is.
+    first.addEventListener('click', () => review.active() ? flip.turnToPage(0) : flip.flip(0));
     document.addEventListener('keydown', event => {
       if (document.querySelector('dialog[open]')) return;
       if (event.altKey || event.ctrlKey || event.metaKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         event.preventDefault();
         (event.key === 'ArrowLeft' ? previous : next).click();
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        first.click();
       }
     });
     new ResizeObserver(() => {

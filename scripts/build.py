@@ -7,6 +7,7 @@ import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+PDF_NAME = 'FFS_Catalog_2027.pdf'
 
 
 def collect_pages():
@@ -28,8 +29,19 @@ def collect_pages():
     return [pages[n] for n in sorted(pages)]
 
 
+def find_pdf():
+    """The single PDF in the project root, published under a stable name."""
+    pdfs = sorted(ROOT.glob('*.pdf'))
+    if len(pdfs) != 1:
+        raise ValueError(f'Debe haber exactamente un PDF en la raíz del proyecto; hay {len(pdfs)}.')
+    if pdfs[0].read_bytes()[:5] != b'%PDF-':
+        raise ValueError(f'PDF inválido: {pdfs[0].name}')
+    return pdfs[0]
+
+
 def build():
     pages = collect_pages()
+    pdf = find_pdf()
     (ROOT / 'pages.json').write_text(json.dumps(pages, ensure_ascii=False, indent=2) + '\n')
     output = ROOT / '_site'
     if output.exists():
@@ -40,6 +52,7 @@ def build():
     shutil.copytree(ROOT / 'vendor', output / 'vendor')
     for page in pages:
         shutil.copy2(ROOT / page['src'], output / page['src'])
+    shutil.copy2(pdf, output / PDF_NAME)
     (output / '.nojekyll').touch()
     print(f'Sitio generado: {len(pages)} páginas en _site/')
 
