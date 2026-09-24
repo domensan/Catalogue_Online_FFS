@@ -22,13 +22,22 @@
       img.height = page.height;
       img.decoding = 'async';
       img.draggable = false;
+      const error = document.createElement('div');
+      error.className = 'page-error';
+      error.hidden = true;
+      error.innerHTML = `<p>Unable to load page ${index + 1}. Check your connection.</p><button type="button">Try again</button>`;
+      error.querySelector('button').addEventListener('click', event => {
+        event.stopPropagation();
+        error.hidden = true;
+        element.classList.replace('failed', 'loading');
+        img.src = `${pages[index].src}?retry=${Date.now()}`;
+      });
+      img.addEventListener('load', () => element.classList.remove('loading'));
       img.addEventListener('error', () => {
-        const error = document.createElement('p');
-        error.className = 'page-error';
-        error.textContent = `Unable to load page ${index + 1}. Reload the viewer to try again.`;
-        element.append(error);
-      }, { once: true });
-      element.append(img);
+        element.classList.replace('loading', 'failed');
+        error.hidden = false;
+      });
+      element.append(img, error);
       book.append(element);
       return element;
     });
@@ -36,7 +45,9 @@
     function preload(index) {
       for (let i = Math.max(0, index - 2); i <= Math.min(pages.length - 1, index + 4); i++) {
         const img = elements[i].querySelector('img');
-        if (!img.hasAttribute('src')) img.src = pages[i].src;
+        if (img.hasAttribute('src')) continue;
+        elements[i].classList.add('loading');
+        img.src = pages[i].src;
       }
     }
     function dimensions() {
