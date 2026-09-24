@@ -35,7 +35,7 @@ def build():
     if output.exists():
         shutil.rmtree(output)
     (output / 'img').mkdir(parents=True)
-    for name in ('index.html', 'styles.css', 'app.js', 'pages.json'):
+    for name in ('index.html', 'styles.css', 'app.js', 'review.js', 'pages.json'):
         shutil.copy2(ROOT / name, output / name)
     shutil.copytree(ROOT / 'vendor', output / 'vendor')
     for page in pages:

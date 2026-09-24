@@ -54,3 +54,11 @@ Los botones tienen etiquetas accesibles, el contador anuncia la página actual y
 ## Librería
 
 [StPageFlip 2.0.7](https://github.com/Nodlik/StPageFlip), distribuida localmente en `vendor/page-flip.browser.js`, sin dependencias ni CDN en tiempo de ejecución. Licencia MIT incluida en `vendor/StPageFlip-LICENSE`.
+
+## Demo local de anotaciones
+
+Pulsa **Review mode** y luego un punto de la página. Escribe y guarda tu comentario: aparecerá un marcador numerado. Pulsa un marcador para editar, resolver/reabrir o eliminar la nota. Pulsa Escape o Cancel para descartar lo que no hayas guardado. En revisión, usa los botones anterior/siguiente para navegar; las páginas no se arrastran. También puedes enfocar una página con Tab y pulsar Intro para comentar en su centro.
+
+Las notas se guardan en `localStorage`, solo en ese navegador y dirección local. No se envían a un servidor ni se comparten entre equipos. Borrar los datos del sitio elimina las notas. Esta demo no incorpora cuentas ni control de acceso. Los puntos se guardan como posiciones proporcionales; reemplazar una imagen con otra composición puede desalinear el comentario respecto del contenido.
+
+Comprobación opcional de la demo con Playwright disponible en Node: `node scripts/check-review.cjs` (servidor local en el puerto 8765).

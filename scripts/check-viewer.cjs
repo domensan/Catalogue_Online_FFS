@@ -9,7 +9,7 @@ const assert = require('node:assert/strict');
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(process.env.CATALOG_URL || 'http://127.0.0.1:8765');
-      await page.waitForFunction(() => document.querySelector('#counter').textContent === 'Página 1 de 48');
+      await page.waitForFunction(() => document.querySelector('#counter').textContent === 'Page 1 of 48');
       await page.waitForTimeout(300);
       // Sample each animation frame: transformed corners must not enlarge the document.
       await page.evaluate(() => {

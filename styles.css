@@ -32,3 +32,21 @@ output { min-width: 130px; text-align: center; font-size: 13px; font-variant-num
   button span { display: none; }
   .hint { font-size: 10px; }
 }
+
+/* Local review notes sit above the book so pointing never turns a page. */
+.review-layer { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+.review-surface { position: absolute; pointer-events: auto; cursor: crosshair; }
+.review-surface:focus-visible { outline: 3px solid #347857; outline-offset: -3px; }
+.review-pin { position: absolute; transform: translate(-50%, -50%); border: 2px solid white; padding: 0; min-height: 34px; width: 34px; height: 34px; border-radius: 50%; background: #b74617; color: white; box-shadow: 0 2px 8px #0005; font-weight: bold; cursor: pointer; }
+.review-pin.resolved { background: #25704a; }
+#review-toggle[aria-pressed="true"] { background: #172526; color: white; }
+.review-dialog { position: fixed; margin: 0; width: min(340px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 20px; border: 1px solid #bec9c0; border-radius: 14px; box-shadow: 0 10px 40px #0003; color: #172526; background: #fff; }
+.review-dialog::backdrop { background: #17252620; }
+.review-dialog h2 { font-size: 16px; margin: 0 0 16px; }
+.review-dialog label { display: block; font-size: 13px; margin-bottom: 8px; }
+.review-dialog textarea { width: 100%; font: inherit; font-size: 16px; padding: 10px; border: 1px solid #87968b; border-radius: 6px; resize: vertical; }
+.note-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.note-actions button { padding: 8px 12px; }
+.note-actions [hidden] { display: none; }
+.note-error { font-size: 13px; color: #a32c17; }
+@media (max-width: 600px) { .brand span { display: none; } #review-toggle { font-size: 12px; } }

@@ -7,15 +7,15 @@
   const counter = document.querySelector('#counter');
   try {
     const response = await fetch('pages.json');
-    if (!response.ok) throw new Error('No se pudo cargar la lista de páginas.');
+    if (!response.ok) throw new Error('Unable to load the page list.');
     const pages = await response.json();
-    if (!pages.length) throw new Error('El catálogo no tiene páginas.');
+    if (!pages.length) throw new Error('The catalog has no pages.');
     const ratio = pages[0].width / pages[0].height;
     const elements = pages.map((page, index) => {
       const element = document.createElement('div');
       element.className = 'page';
       const img = document.createElement('img');
-      img.alt = `Página ${index + 1} del catálogo FFS 2027`;
+      img.alt = `Page ${index + 1} of the FFS 2027 catalog`;
       img.width = page.width;
       img.height = page.height;
       img.decoding = 'async';
@@ -23,7 +23,7 @@
       img.addEventListener('error', () => {
         const error = document.createElement('p');
         error.className = 'page-error';
-        error.textContent = `No se pudo cargar la página ${index + 1}. Recarga el visor para reintentar.`;
+        error.textContent = `Unable to load page ${index + 1}. Reload the viewer to try again.`;
         element.append(error);
       }, { once: true });
       element.append(img);
@@ -58,7 +58,7 @@
     function update() {
       const index = flip.getCurrentPageIndex();
       preload(index);
-      counter.textContent = `Página ${index + 1} de ${pages.length}`;
+      counter.textContent = `Page ${index + 1} of ${pages.length}`;
       previous.disabled = index === 0;
       const lastVisible = index + (flip.getOrientation() === 'landscape' && index > 0 ? 1 : 0);
       next.disabled = lastVisible >= pages.length - 1;
@@ -74,9 +74,11 @@
       flip.getPage(index).setDrawingDensity('soft');
     }
     message.hidden = true;
-    previous.addEventListener('click', () => flip.flipPrev());
-    next.addEventListener('click', () => flip.flipNext());
+    const review = setupReview({ flip, pages, viewer, book });
+    previous.addEventListener('click', () => review.active() ? flip.turnToPrevPage() : flip.flipPrev());
+    next.addEventListener('click', () => review.active() ? flip.turnToNextPage() : flip.flipNext());
     document.addEventListener('keydown', event => {
+      if (document.querySelector('dialog[open]')) return;
       if (event.altKey || event.ctrlKey || event.metaKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         event.preventDefault();
@@ -91,8 +93,8 @@
     }).observe(viewer);
   } catch (error) {
     message.hidden = false;
-    message.textContent = 'No se pudo abrir el catálogo. Comprueba tu conexión y recarga la página.';
-    counter.textContent = 'Catálogo no disponible';
+    message.textContent = 'Unable to open the catalog. Check your connection and reload the page.';
+    counter.textContent = 'Catalog unavailable';
     console.error(error);
   }
 })();
