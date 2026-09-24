@@ -24,6 +24,8 @@ const assert = require('node:assert/strict');
           if (failNext) { failNext = false; return route.abort(); }
           return route.fulfill({ json: { ok: true, id: note.id } });
         }
+        // Apps Script reads are slow; clicks made meanwhile must still open the dialog.
+        await new Promise(resolve => setTimeout(resolve, 800));
         return route.fulfill({ json: { ok: true, version: 2, comments: stored } });
       });
       const page = await context.newPage();
@@ -31,8 +33,9 @@ const assert = require('node:assert/strict');
       page.on('pageerror', e => errors.push(e.message));
       await page.goto('http://127.0.0.1:8765');
       await page.locator('#review-toggle').click();
-      await page.waitForFunction(() => document.querySelector('#review-status').textContent.startsWith('Shared comments'));
       await page.locator('.review-surface').first().click({ position: { x: 100, y: 100 } });
+      assert(await page.locator('dialog[open]').isVisible(), 'first click opens the dialog while comments load');
+      assert.equal(await page.locator('#review-status').textContent(), 'Loading shared comments…');
       await page.locator('#note-name').fill('Reviewer');
       await page.locator('#note-text').fill('Review <b>this</b> image');
       await page.getByRole('button', { name: 'Save', exact: true }).click();

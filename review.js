@@ -7,7 +7,8 @@ function setupReview({ flip, pages, viewer, book }) {
   let selected;
   let opener;
   let saving = false;
-  let loading = false;
+  let loading;
+  let reachedService = false;
   let supportsDelete = false;
   const keyFor = id => `ffs-comment-owner:${id}`;
   function ownerToken(id) {
@@ -27,14 +28,18 @@ function setupReview({ flip, pages, viewer, book }) {
     if (!data.ok) throw new Error(data.error || 'Request failed');
     return data;
   }
-  async function load() {
-    if (loading) return;
-    loading = true;
+  // Concurrent callers share the in-flight request instead of being ignored.
+  function load() {
+    loading ||= fetchComments().finally(() => { loading = undefined; });
+    return loading;
+  }
+  async function fetchComments() {
     refresh.disabled = true;
     status.textContent = 'Loading shared comments…';
     try {
       const data = await request();
       if (!Array.isArray(data.comments) || !data.comments.every(n => n && typeof n.id === 'string' && typeof n.text === 'string' && typeof n.name === 'string' && Number.isInteger(n.page) && n.page >= 1 && n.page <= pages.length && Number.isFinite(n.x) && n.x >= 0 && n.x <= 1 && Number.isFinite(n.y) && n.y >= 0 && n.y <= 1)) throw new Error('Invalid comments');
+      reachedService = true;
       supportsDelete = data.version === 2;
       notes = data.comments;
       status.textContent = 'Shared comments. Click a spot to add a comment. Refresh to see updates from other reviewers.';
@@ -42,7 +47,6 @@ function setupReview({ flip, pages, viewer, book }) {
     } catch {
       status.textContent = 'Unable to refresh comments. Previously loaded comments are still shown. Please try again.';
     } finally {
-      loading = false;
       refresh.disabled = false;
     }
   }
@@ -74,18 +78,36 @@ function setupReview({ flip, pages, viewer, book }) {
 
   async function save() {
     if (saving) return;
-    if (!supportsDelete) { error.textContent = 'Comment service update required. Please refresh and try again later.'; return; }
-    let token = ownerToken(selected.id);
-    try {
-      if (!token) {
-        token = Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, '0')).join('');
-        localStorage.setItem(keyFor(selected.id), token);
-      }
-    } catch { error.textContent = 'Enable browser storage to save a comment and keep your deletion key.'; return; }
     saving = true;
     submit.disabled = cancel.disabled = name.disabled = text.disabled = true;
-    submit.textContent = 'Saving…';
     error.textContent = '';
+    try {
+      if (!supportsDelete) {
+        // The dialog opens before comments finish loading; wait for the service here.
+        submit.textContent = 'Connecting…';
+        await load();
+      }
+      if (!supportsDelete) {
+        error.textContent = reachedService ? 'Comment service update required. Please try again later.' : 'Unable to reach the comment service. Check your connection and try again.';
+        return;
+      }
+      let token = ownerToken(selected.id);
+      try {
+        if (!token) {
+          token = Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, '0')).join('');
+          localStorage.setItem(keyFor(selected.id), token);
+        }
+      } catch { error.textContent = 'Enable browser storage to save a comment and keep your deletion key.'; return; }
+      await send(token);
+    } finally {
+      saving = false;
+      submit.disabled = cancel.disabled = name.disabled = text.disabled = false;
+      name.readOnly = text.readOnly = Boolean(selected.payload);
+      submit.textContent = selected.payload ? 'Retry save' : 'Save';
+    }
+  }
+  async function send(token) {
+    submit.textContent = 'Saving…';
     // Keep the same ID and payload on retries if the server saved but its reply was lost.
     selected.payload ||= { ...selected, name: name.value.trim(), text: text.value.trim(), ownerToken: token };
     try {
@@ -98,11 +120,6 @@ function setupReview({ flip, pages, viewer, book }) {
       status.textContent = 'Saved to the shared review sheet. Other reviewers can refresh to see your comment.';
     } catch {
       error.textContent = 'Save not confirmed. Your comment is still here. Click Retry save to check or finish saving the same comment.';
-    } finally {
-      saving = false;
-      submit.disabled = cancel.disabled = name.disabled = text.disabled = false;
-      name.readOnly = text.readOnly = Boolean(selected.payload);
-      submit.textContent = 'Retry save';
     }
   }
   function openNote(note, index, anchor) {
@@ -174,7 +191,6 @@ function setupReview({ flip, pages, viewer, book }) {
       surface.setAttribute('role', 'group');
       surface.setAttribute('aria-label', `Annotate page ${i + 1}. Click a spot or press Enter to comment at the center.`);
       function create(x, y, anchor) {
-        if (loading) return;
         openNote({ id: crypto.randomUUID(), page: i + 1, x, y, text: '', resolved: false }, i, anchor);
       }
       surface.onclick = event => {
