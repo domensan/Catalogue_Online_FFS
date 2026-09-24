@@ -44,9 +44,13 @@ output { min-width: 130px; text-align: center; font-size: 13px; font-variant-num
 .review-dialog::backdrop { background: #17252620; }
 .review-dialog h2 { font-size: 16px; margin: 0 0 16px; }
 .review-dialog label { display: block; font-size: 13px; margin-bottom: 8px; }
-.review-dialog textarea { width: 100%; font: inherit; font-size: 16px; padding: 10px; border: 1px solid #87968b; border-radius: 6px; resize: vertical; }
+.review-dialog input, .review-dialog textarea { width: 100%; font: inherit; font-size: 16px; padding: 10px; border: 1px solid #87968b; border-radius: 6px; resize: vertical; }
 .note-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .note-actions button { padding: 8px 12px; }
 .note-actions [hidden] { display: none; }
 .note-error { font-size: 13px; color: #a32c17; }
 @media (max-width: 600px) { .brand span { display: none; } #review-toggle { font-size: 12px; } }
+
+.review-refresh { display: block; margin: 10px auto 0; }
+.review-refresh[hidden] { display: none; }
+#note-details { margin: 12px 0; text-align: left; line-height: 1.5; }

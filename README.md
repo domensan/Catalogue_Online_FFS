@@ -55,10 +55,16 @@ Los botones tienen etiquetas accesibles, el contador anuncia la página actual y
 
 [StPageFlip 2.0.7](https://github.com/Nodlik/StPageFlip), distribuida localmente en `vendor/page-flip.browser.js`, sin dependencias ni CDN en tiempo de ejecución. Licencia MIT incluida en `vendor/StPageFlip-LICENSE`.
 
-## Demo local de anotaciones
+## Comentarios compartidos en Google Sheets
 
-Pulsa **Review mode** y luego un punto de la página. Escribe y guarda tu comentario: aparecerá un marcador numerado. Pulsa un marcador para editar, resolver/reabrir o eliminar la nota. Pulsa Escape o Cancel para descartar lo que no hayas guardado. En revisión, usa los botones anterior/siguiente para navegar; las páginas no se arrastran. También puedes enfocar una página con Tab y pulsar Intro para comentar en su centro.
+Pulsa **Review mode**, espera que carguen los comentarios y selecciona un punto de la página. Escribe tu nombre y comentario, y pulsa **Save**. El visor confirma el guardado solo cuando Apps Script responde correctamente. **Refresh comments** recupera las notas de otros revisores. No hay actualización en tiempo real.
 
-Las notas se guardan en `localStorage`, solo en ese navegador y dirección local. No se envían a un servidor ni se comparten entre equipos. Borrar los datos del sitio elimina las notas. Esta demo no incorpora cuentas ni control de acceso. Los puntos se guardan como posiciones proporcionales; reemplazar una imagen con otra composición puede desalinear el comentario respecto del contenido.
+Los comentarios se guardan en la pestaña **Comments** de la planilla privada del propietario. Cualquier visitante del catálogo puede leerlos y agregar notas; los nombres son declarados, no verificados. Las notas publicadas son de solo lectura en el catálogo. El propietario puede corregirlas, eliminar filas o cambiar **Status** a **Resolved** (resuelto) u **Open** (pendiente) directamente en Sheets. No cambiar los encabezados ni los IDs. Las posiciones X/Y son proporciones entre 0 y 1.
 
-Comprobación opcional de la demo con Playwright disponible en Node: `node scripts/check-review.cjs` (servidor local en el puerto 8765).
+La planilla es https://docs.google.com/spreadsheets/d/1LMfiDG1WuCj6wvtCitj4_iDcCddZ72R1o2OqZFYkLA4/edit. La URL pública de Apps Script está en `review.js`. El código desplegado se conserva en `apps-script/Code.gs`; este archivo no se incluye en `_site/`. La aplicación web se despliega en Apps Script con **Execute as: Me** y **Who has access: Anyone**. Los cambios al código del servidor requieren actualizar la versión del despliegue en Apps Script; el push a GitHub solo publica el visor.
+
+Si falla el envío, el texto permanece en el diálogo. **Retry save** reenvía el mismo ID y contenido, evitando duplicados si Google ya lo guardó pero la respuesta se perdió. No cerrar la pestaña antes de confirmar el guardado. Las notas de la antigua demo local permanecen en el almacenamiento de su navegador; no se publican automáticamente.
+
+Al terminar la revisión se puede archivar el despliegue de Apps Script y conservar la planilla. El servidor valida páginas 1–48; si se agregan más páginas, actualizar ese límite en `validate_` y desplegar una nueva versión. Reemplazar imágenes con otra composición puede cambiar a qué contenido apunta una anotación anterior.
+
+Pruebas: `node scripts/check-apps-script.cjs` valida el servidor con dobles locales; `node scripts/check-review.cjs` prueba el flujo del navegador con respuestas simuladas, sin escribir en Sheets (requiere Playwright y servidor local en 8765).

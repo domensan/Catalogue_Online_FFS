@@ -1,71 +1,122 @@
 function setupReview({ flip, pages, viewer, book }) {
   const toggle = document.querySelector('#review-toggle');
   const status = document.querySelector('#review-status');
-  const storageKey = 'ffs-catalog-review-v1';
+  const endpoint = 'https://script.google.com/macros/s/AKfycbxgEUhXzPtsFjo6nI_f4XCQqYiVDQbaGbQQMTVGFrTvk1QgSBI8DlpdfSts_P4YZ4ZcAA/exec';
   let enabled = false;
   let notes = [];
   let selected;
   let opener;
-  try {
-    const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    if (!Array.isArray(stored) || !stored.every(n => n && typeof n.id === 'string' && typeof n.page === 'string' && typeof n.text === 'string' && Number.isFinite(n.x) && n.x >= 0 && n.x <= 1 && Number.isFinite(n.y) && n.y >= 0 && n.y <= 1)) throw new Error('Invalid notes');
-    notes = stored;
-  } catch {
-    status.textContent = 'Unable to retrieve saved comments. They will not be overwritten. Check your browser storage.';
-    status.hidden = false;
-    return { active: () => false };
+  let saving = false;
+  let loading = false;
+  const refresh = document.createElement('button');
+  refresh.type = 'button';
+  refresh.textContent = 'Refresh comments';
+  refresh.hidden = true;
+  status.after(refresh);
+  refresh.className = 'review-refresh';
+
+  async function request(options = {}) {
+    const response = await fetch(endpoint, { ...options, credentials: 'omit', redirect: 'follow', signal: AbortSignal.timeout(30000) });
+    if (!response.ok) throw new Error('Connection failed');
+    const data = await response.json();
+    if (!data.ok) throw new Error(data.error || 'Request failed');
+    return data;
   }
+  async function load() {
+    if (loading) return;
+    loading = true;
+    refresh.disabled = true;
+    status.textContent = 'Loading shared comments…';
+    try {
+      const data = await request();
+      if (!Array.isArray(data.comments) || !data.comments.every(n => n && typeof n.id === 'string' && typeof n.text === 'string' && typeof n.name === 'string' && Number.isInteger(n.page) && n.page >= 1 && n.page <= pages.length && Number.isFinite(n.x) && n.x >= 0 && n.x <= 1 && Number.isFinite(n.y) && n.y >= 0 && n.y <= 1)) throw new Error('Invalid comments');
+      notes = data.comments;
+      status.textContent = 'Shared comments. Click a spot to add a comment. Refresh to see updates from other reviewers.';
+      draw();
+    } catch {
+      status.textContent = 'Unable to refresh comments. Previously loaded comments are still shown. Please try again.';
+    } finally {
+      loading = false;
+      refresh.disabled = false;
+    }
+  }
+  refresh.onclick = load;
   const layer = document.createElement('div');
   layer.className = 'review-layer';
   viewer.append(layer);
   const dialog = document.createElement('dialog');
   dialog.className = 'review-dialog';
   dialog.innerHTML = `<form><h2 id="note-title">Add comment</h2>
+    <label for="note-name">Your name</label>
+    <input id="note-name" autocomplete="name" maxlength="100" required>
+    <p id="note-details" class="hint"></p>
     <label for="note-text">Comment</label>
     <textarea id="note-text" rows="4" maxlength="2000" required placeholder="What needs to be updated here?"></textarea>
     <p class="note-error" role="alert"></p>
     <div class="note-actions"><button type="button" data-action="cancel">Cancel</button><button type="submit">Save</button></div>
-    <div class="note-actions"><button type="button" data-action="resolve">Mark as resolved</button><button type="button" data-action="delete">Delete comment</button></div>
+
     </form>`;
   dialog.setAttribute('aria-labelledby', 'note-title');
   document.body.append(dialog);
   const text = dialog.querySelector('textarea');
   const error = dialog.querySelector('.note-error');
-  const resolve = dialog.querySelector('[data-action="resolve"]');
-  const remove = dialog.querySelector('[data-action="delete"]');
-  const pageKey = index => pages[index].src.normalize('NFC');
+  const name = dialog.querySelector('#note-name');
+  const submit = dialog.querySelector('[type="submit"]');
+  const cancel = dialog.querySelector('[data-action="cancel"]');
+  const details = dialog.querySelector('#note-details');
 
-  function save(updated) {
-    try { localStorage.setItem(storageKey, JSON.stringify(updated)); }
-    catch { error.textContent = 'Unable to save. Browser storage may be full or blocked. Your text is still here.'; return; }
-    notes = updated;
-    dialog.close();
-    draw();
+  async function save() {
+    if (saving) return;
+    saving = true;
+    submit.disabled = cancel.disabled = name.disabled = text.disabled = true;
+    submit.textContent = 'Saving…';
+    error.textContent = '';
+    // Keep the same ID and payload on retries if the server saved but its reply was lost.
+    selected.payload ||= { ...selected, name: name.value.trim(), text: text.value.trim() };
+    try {
+      const result = await request({ method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(selected.payload) });
+      if (result.id !== selected.id) throw new Error('Save was not confirmed');
+      notes.push({ ...selected.payload, createdAt: new Date().toISOString() });
+      dialog.close();
+      draw();
+      status.textContent = 'Saved to the shared review sheet. Other reviewers can refresh to see your comment.';
+    } catch {
+      error.textContent = 'Save not confirmed. Your comment is still here. Click Retry save to check or finish saving the same comment.';
+    } finally {
+      saving = false;
+      submit.disabled = cancel.disabled = name.disabled = text.disabled = false;
+      name.readOnly = text.readOnly = Boolean(selected.payload);
+      submit.textContent = 'Retry save';
+    }
   }
   function openNote(note, index, anchor) {
     selected = note;
     opener = anchor;
     const existing = notes.some(n => n.id === note.id);
     text.value = note.text;
+    name.value = note.name || '';
+    name.readOnly = text.readOnly = existing;
+    submit.hidden = existing;
+    submit.textContent = 'Save';
+    cancel.textContent = existing ? 'Close' : 'Cancel';
+    details.textContent = existing ? `${note.resolved ? 'Resolved' : 'Open'} · ${note.createdAt ? new Date(note.createdAt).toLocaleString('en-US') : ''}` : 'Your name and comment will be visible to everyone with the catalog link.';
     error.textContent = '';
     dialog.querySelector('h2').textContent = `${existing ? 'Comment' : 'Add comment'} · Page ${index + 1}`;
-    resolve.hidden = remove.hidden = !existing;
-    resolve.textContent = note.resolved ? 'Reopen comment' : 'Mark as resolved';
+
     dialog.showModal();
     const rect = anchor.getBoundingClientRect();
     dialog.style.left = `${Math.max(12, Math.min(rect.right + 12, innerWidth - dialog.offsetWidth - 12))}px`;
     dialog.style.top = `${Math.max(12, Math.min(rect.top, innerHeight - dialog.offsetHeight - 12))}px`;
-    text.focus();
+    (existing ? cancel : name).focus();
   }
   dialog.querySelector('form').addEventListener('submit', event => {
     event.preventDefault();
-    if (!text.value.trim()) { error.textContent = 'Enter a comment before saving.'; return; }
-    const note = { ...selected, text: text.value.trim() };
-    save(notes.some(n => n.id === note.id) ? notes.map(n => n.id === note.id ? note : n) : [...notes, note]);
+    if (notes.some(note => note.id === selected.id)) return;
+    if (!text.value.trim() || !name.value.trim()) { error.textContent = 'Enter your name and a comment before saving.'; return; }
+    save();
   });
-  dialog.querySelector('[data-action="cancel"]').onclick = () => dialog.close();
-  resolve.onclick = () => save(notes.map(n => n.id === selected.id ? { ...n, resolved: !n.resolved } : n));
-  remove.onclick = () => save(notes.filter(n => n.id !== selected.id));
+  cancel.onclick = () => dialog.close();
+  dialog.addEventListener('cancel', event => { if (saving) event.preventDefault(); });
   dialog.addEventListener('close', () => { if (opener?.isConnected) opener.focus(); else toggle.focus(); });
 
   function draw() {
@@ -84,7 +135,8 @@ function setupReview({ flip, pages, viewer, book }) {
       surface.setAttribute('role', 'group');
       surface.setAttribute('aria-label', `Annotate page ${i + 1}. Click a spot or press Enter to comment at the center.`);
       function create(x, y, anchor) {
-        openNote({ id: crypto.randomUUID(), page: pageKey(i), x, y, text: '', resolved: false }, i, anchor);
+        if (loading) return;
+        openNote({ id: crypto.randomUUID(), page: i + 1, x, y, text: '', resolved: false }, i, anchor);
       }
       surface.onclick = event => {
         if (event.target !== surface) return;
@@ -95,7 +147,7 @@ function setupReview({ flip, pages, viewer, book }) {
         if (event.target === surface && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); create(.5, .5, surface); }
       };
       notes.forEach((note, number) => {
-        if (note.page !== pageKey(i)) return;
+        if (note.page !== i + 1) return;
         const pin = document.createElement('button');
         pin.type = 'button';
         pin.className = `review-pin${note.resolved ? ' resolved' : ''}`;
@@ -117,7 +169,8 @@ function setupReview({ flip, pages, viewer, book }) {
     toggle.textContent = enabled ? 'Exit review' : 'Review mode';
     book.style.pointerEvents = enabled ? 'none' : '';
     flip.getSettings().showPageCorners = !enabled;
-    status.hidden = !enabled;
+    status.hidden = refresh.hidden = !enabled;
+    if (enabled) load();
     document.querySelector('.hint').hidden = enabled;
     draw();
   };
