@@ -1,4 +1,5 @@
 (async () => {
+  const intro = document.querySelector('#catalog-intro');
   const book = document.querySelector('#book');
   const viewer = document.querySelector('#viewer');
   const message = document.querySelector('#message');
@@ -42,6 +43,11 @@
       const height = viewer.clientHeight;
       const portrait = width < 700;
       const pageWidth = Math.min(width / (portrait ? 1 : 2), height * ratio);
+      document.querySelector('main').classList.toggle('portrait-layout', portrait);
+      intro.style.setProperty('--intro-left', `${viewer.offsetLeft + (width - pageWidth * 2) / 2}px`);
+      intro.style.setProperty('--intro-top', `${viewer.offsetTop + (height - pageWidth / ratio) / 2}px`);
+      intro.style.setProperty('--intro-width', `${pageWidth}px`);
+      intro.style.setProperty('--intro-height', `${pageWidth / ratio}px`);
       book.style.minWidth = '0';
       book.style.width = `${pageWidth * (portrait ? 1 : 2)}px`;
       book.style.height = `${pageWidth / ratio}px`;
@@ -57,12 +63,14 @@
     });
     function update() {
       const index = flip.getCurrentPageIndex();
+      intro.hidden = index !== 0;
       preload(index);
       counter.textContent = `Page ${index + 1} of ${pages.length}`;
       previous.disabled = index === 0;
       const lastVisible = index + (flip.getOrientation() === 'landscape' && index > 0 ? 1 : 0);
       next.disabled = lastVisible >= pages.length - 1;
     }
+    flip.on('changeState', event => { intro.style.visibility = event.data === 'read' ? '' : 'hidden'; });
     flip.on('init', update);
     flip.on('flip', update);
     flip.on('changeOrientation', update);
