@@ -2,6 +2,8 @@
 const SPREADSHEET_ID = '1LMfiDG1WuCj6wvtCitj4_iDcCddZ72R1o2OqZFYkLA4';
 const TAB = 'Comments';
 const HEADERS = ['ID', 'Created at', 'Page', 'X', 'Y', 'Name', 'Comment', 'Status', 'Owner hash'];
+// Generous ceiling so a growing catalog needs no redeploy; the viewer checks the real page count.
+const MAX_PAGE = 500;
 
 function setup() {
   const book = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -61,7 +63,7 @@ function doGet() {
 
 function validate_(note) {
   return note && typeof note.id === 'string' && /^[a-f0-9-]{36}$/i.test(note.id)
-    && Number.isInteger(note.page) && note.page >= 1 && note.page <= 48
+    && Number.isInteger(note.page) && note.page >= 1 && note.page <= MAX_PAGE
     && Number.isFinite(note.x) && note.x >= 0 && note.x <= 1
     && Number.isFinite(note.y) && note.y >= 0 && note.y <= 1
     && typeof note.name === 'string' && note.name.trim().length > 0 && note.name.length <= 100

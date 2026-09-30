@@ -1,6 +1,7 @@
 // Optional browser regression check: install Playwright and run with NODE_PATH set to its node_modules.
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
+const pageCount = require('../pages.json').length;
 (async () => {
   const browser = await chromium.launch();
   try {
@@ -9,7 +10,7 @@ const assert = require('node:assert/strict');
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(process.env.CATALOG_URL || 'http://127.0.0.1:8765');
-      await page.waitForFunction(() => document.querySelector('#counter').textContent === 'Page 1 of 48');
+      await page.waitForFunction(count => document.querySelector('#counter').textContent === `Page 1 of ${count}`, pageCount);
       await page.waitForTimeout(300);
       // Sample each animation frame: transformed corners must not enlarge the document.
       await page.evaluate(() => {

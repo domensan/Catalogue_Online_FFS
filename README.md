@@ -1,6 +1,6 @@
 # Catálogo FFS 2027
 
-Visor estático de las 48 páginas originales: animación de libro con StPageFlip, arrastre, botones, flechas del teclado, botón **Cover** (o tecla Inicio) para volver a la portada, doble página en escritorio y página individual en móvil. No requiere frameworks, npm ni servidor de aplicación.
+Visor estático de las páginas originales del catálogo (actualmente 84): animación de libro con StPageFlip, arrastre, botones, flechas del teclado, botón **Cover** (o tecla Inicio) para volver a la portada, doble página en escritorio y página individual en móvil. No requiere frameworks, npm ni servidor de aplicación.
 
 ## Ejecutar localmente
 
@@ -15,15 +15,16 @@ Abrir http://localhost:8000. Usar un servidor HTTP; abrir el HTML directamente c
 
 ## Agregar o actualizar páginas
 
-Colocar o reemplazar los PNG en `img/` con nombres consecutivos:
+Colocar o reemplazar los PNG en `img/` con nombres que terminen en el número de página:
 
 ```text
-Cat_FFS_2027_V2_Página_01.png
-Cat_FFS_2027_V2_Página_02.png
+Cat_FFS_2027_V4_Página_01.png
+Cat_FFS_2027_V4_Página_02.png
 ...
-Cat_FFS_2027_V2_Página_48.png
-Cat_FFS_2027_V2_Página_49.png
+Cat_FFS_2027_V4_Página_84.png
 ```
+
+El nombre antes del número puede cambiar entre exportaciones (por ejemplo `V4` → `V5`), pero todas las imágenes de `img/` deben venir de la misma exportación: al actualizar, borrar primero las imágenes anteriores. `scripts/check.py` falla si se mezclan nombres distintos o si un PNG no termina en número.
 
 No modificar HTML ni JavaScript ni mantener un número de páginas manualmente. El generador descubre las imágenes en orden numérico y conserva su nombre Unicode exacto, tanto si la tilde viene compuesta como descompuesta desde macOS. La numeración debe comenzar en 01, sin huecos ni duplicados. Mantener la misma proporción de página. El contenido del catálogo procede únicamente de los PNG originales.
 
@@ -69,7 +70,7 @@ La planilla es https://docs.google.com/spreadsheets/d/1LMfiDG1WuCj6wvtCitj4_iDcC
 
 Si falla el envío, el texto permanece en el diálogo. **Retry save** reenvía el mismo ID y contenido, evitando duplicados si Google ya lo guardó pero la respuesta se perdió. No cerrar la pestaña antes de confirmar el guardado. Las notas de la antigua demo local permanecen en el almacenamiento de su navegador; no se publican automáticamente.
 
-Al terminar la revisión se puede archivar el despliegue de Apps Script y conservar la planilla. El servidor valida páginas 1–48; si se agregan más páginas, actualizar ese límite en `validate_` y desplegar una nueva versión. Reemplazar imágenes con otra composición puede cambiar a qué contenido apunta una anotación anterior.
+Al terminar la revisión se puede archivar el despliegue de Apps Script y conservar la planilla. El servidor acepta páginas 1–500 (`MAX_PAGE` en `apps-script/Code.gs`); el visor limita los comentarios al número real de páginas. Reemplazar imágenes con otra composición puede cambiar a qué contenido apunta una anotación anterior.
 
 Pruebas: `node scripts/check-apps-script.cjs` valida el servidor con dobles locales; `node scripts/check-review.cjs` prueba el flujo del navegador con respuestas simuladas, sin escribir en Sheets (requiere Playwright y servidor local en 8765).
 

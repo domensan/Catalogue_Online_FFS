@@ -11,12 +11,15 @@ PDF_NAME = 'FFS_Catalog_2027.pdf'
 
 
 def collect_pages():
+    """Pages are the img/*.png files ending in _NN; any export name or version works."""
     pages = {}
+    prefixes = set()
     for path in (ROOT / 'img').glob('*.png'):
-        match = re.fullmatch(r'Cat_FFS_2027_V2_Página_(\d{2,})\.png', unicodedata.normalize('NFC', path.name))
+        match = re.fullmatch(r'(.+)_(\d{2,})\.png', unicodedata.normalize('NFC', path.name))
         if not match:
-            continue
-        number = int(match[1])
+            raise ValueError(f'Nombre sin número de página: {path.name}')
+        prefixes.add(match[1])
+        number = int(match[2])
         if number in pages:
             raise ValueError(f'Página duplicada: {number}')
         data = path.read_bytes()
@@ -24,6 +27,8 @@ def collect_pages():
             raise ValueError(f'PNG inválido: {path.name}')
         width, height = struct.unpack('>II', data[16:24])
         pages[number] = {'src': path.relative_to(ROOT).as_posix(), 'width': width, 'height': height}
+    if len(prefixes) > 1:
+        raise ValueError(f'Hay imágenes de exportaciones distintas en img/: {", ".join(sorted(prefixes))}')
     if not pages or sorted(pages) != list(range(1, max(pages) + 1)):
         raise ValueError('Las páginas deben ser consecutivas desde 01, sin huecos.')
     return [pages[n] for n in sorted(pages)]
