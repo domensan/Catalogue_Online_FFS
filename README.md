@@ -40,7 +40,7 @@ git push origin main
 
 ## PDF descargable
 
-El botón **Download PDF** descarga el único archivo `.pdf` de la raíz del proyecto (actualmente `Cat_FFS_2027_V3.pdf`). El generador lo publica siempre como `FFS_Catalog_2027.pdf`, así que para actualizarlo basta reemplazar el PDF (puede tener otro nombre) y hacer push; no hay que tocar el HTML. `scripts/check.py` falla si no hay PDF o si hay más de uno.
+El botón **Download PDF** descarga el único archivo `.pdf` de la raíz del proyecto. El generador lo publica siempre como `FFS_Catalog_2027.pdf`, así que para actualizarlo basta reemplazar el PDF (puede tener otro nombre) y hacer push; no hay que tocar el HTML. `scripts/check.py` falla si no hay PDF o si hay más de uno.
 
 ## GitHub Pages
 
