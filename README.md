@@ -1,6 +1,6 @@
 # Catálogo FFS 2027
 
-Visor estático de las páginas originales del catálogo (actualmente 84): animación de libro con StPageFlip, arrastre, botones, flechas del teclado, botón **Cover** (o tecla Inicio) para volver a la portada, doble página en escritorio y página individual en móvil. No requiere frameworks, npm ni servidor de aplicación.
+Visor estático de las páginas originales del catálogo (actualmente 90): animación de libro con StPageFlip, arrastre, botones, flechas del teclado, botón **Cover** (o tecla Inicio) para volver a la portada, doble página en escritorio y página individual en móvil. No requiere frameworks, npm ni servidor de aplicación.
 
 ## Ejecutar localmente
 
@@ -18,10 +18,10 @@ Abrir http://localhost:8000. Usar un servidor HTTP; abrir el HTML directamente c
 Colocar o reemplazar los PNG en `img/` con nombres que terminen en el número de página:
 
 ```text
-Cat_FFS_2027_V4_Página_01.png
-Cat_FFS_2027_V4_Página_02.png
+Cat_FFS_2027_V5_Página_01.png
+Cat_FFS_2027_V5_Página_02.png
 ...
-Cat_FFS_2027_V4_Página_84.png
+Cat_FFS_2027_V5_Página_90.png
 ```
 
 El nombre antes del número puede cambiar entre exportaciones (por ejemplo `V4` → `V5`), pero todas las imágenes de `img/` deben venir de la misma exportación: al actualizar, borrar primero las imágenes anteriores. `scripts/check.py` falla si se mezclan nombres distintos o si un PNG no termina en número.
