@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172526">
+  <title>FFS 2027 Catalog</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="vendor/page-flip.browser.js" defer></script>
+  <script src="review.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="./" aria-label="FFS catalog home">FFS<span>CATALOG / 2027</span></a><div class="header-actions"><a class="button-link" href="FFS_Catalog_2027.pdf" download>Download PDF</a><button id="review-toggle" type="button" aria-pressed="false" disabled>Review mode</button></div></header>
+  <main>
+    <section id="catalog-intro" class="catalog-intro" aria-labelledby="intro-title" hidden tabindex="0">
+      <h1 id="intro-title">FFS 2027 Catalog, Work in Progress</h1>
+      <p>This is an early draft of the 2027 catalog, shared for internal review. It builds on the visual style we approved earlier and extends it into a full catalog. Please treat this as one piece of a broader ecosystem: catalog, marketing sheets, technical data sheets, flyers and more.</p>
+      <h2>The concept: from sketch to reality</h2>
+      <p>The section and product covers draw on the design process of Chip Foose, who sketches a vehicle by hand before bringing it to life. Fast Fill Systems works the same way: we take an idea and engineer it into a real, field-ready product. That sketch-to-reality spirit is what the covers are meant to convey. The concept is designed to carry the brand for a while and can evolve over time. Nothing is set in stone.</p>
+      <h2>New: complete systems</h2>
+      <p>Beyond individual products, this catalog now presents the complete systems Fast Fill Systems offers, such as pressureless configurations. These pages show how the components work together inside the tank, making it easier to understand the full solution rather than just a single part.</p>
+      <h2>What to review at this stage</h2>
+      <p>Please focus on layout, visual style and overall structure. Technical content has not yet been validated by Engineering, so specifications, dimensions and product names may contain inconsistencies. Some images are AI-generated and may include technical inaccuracies.</p>
+      <h2>Still in progress</h2>
+      <ul>
+        <li>Section and product covers are provisional. For example, the Fuel Nozzles cover may eventually show the full nozzle lineup.</li>
+        <li>Some interior pages for each product line are still being designed.</li>
+        <li>QR codes currently link to the nozzles only (Atlas, PitBoss, SureLoc 150 and SureLoc 1000). Other products will be added in the same way. In the digital version, QR codes will also work as clickable links.</li>
+      </ul>
+      <h2>How to comment</h2>
+      <p>Click <strong>Review mode</strong> in the upper-right corner to start. Use the <strong>Previous</strong> and <strong>Next</strong> buttons to find the page you want to review, then click or tap the exact spot you want to comment on. Enter your name and feedback, click <strong>Save</strong>, and wait for the confirmation that your comment has been saved.</p>
+      <p>Each saved comment appears as a numbered marker. Click a marker to read it, or click <strong>Refresh comments</strong> below the catalog to see feedback from other reviewers. All comments are collected in one place and are visible to everyone with the catalog link. Click <strong>Exit review</strong> in the upper-right corner to return to normal page turning.</p>
+    </section>
+    <div class="viewer" id="viewer" aria-label="Catalog viewer">
+      <div id="book"></div>
+      <p id="message" role="status"><span class="spinner" aria-hidden="true"></span>Loading catalog…</p>
+    </div>
+    <nav aria-label="Catalog navigation">
+      <button id="first" type="button" aria-label="Go to cover" disabled>⇤ <span>Cover</span></button>
+      <button id="previous" type="button" aria-label="Previous page" disabled>← <span>Previous</span></button>
+      <output id="counter" aria-live="polite" aria-atomic="true">Loading…</output>
+      <button id="next" type="button" aria-label="Next page" disabled><span>Next</span> →</button>
+    </nav>
+    <p class="hint">Drag a corner or use the arrow keys to turn the page.</p>
+    <p id="review-status" class="hint" role="status" hidden>Shared review: comments are saved to the review sheet and visible to everyone with the catalog link.</p>
+    <noscript>Enable JavaScript to use the catalog viewer.</noscript>
+  </main>
+</body>
+</html>

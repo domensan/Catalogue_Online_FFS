@@ -1,0 +1,87 @@
+:root { color-scheme: light; font-family: Arial, Helvetica, sans-serif; color: #172526; background: #eeefeb;
+  /* FFS logo blue (#4486ca), deepened to keep small text readable (4.5:1 on the page and under white text). */
+  --brand: #336fae; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+header { height: 76px; padding: 0 5vw; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #d5dad4; }
+.brand { display: flex; align-items: center; gap: 20px; color: inherit; text-decoration: none; font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+.brand span, .edition { font-size: 10px; letter-spacing: 2px; font-weight: 600; }
+.brand span { border-left: 1px solid #b6bfba; padding-left: 20px; }
+.edition { color: #65736b; }
+main { position: relative; padding: 24px 20px 16px; }
+/* Rotated pages and shadows must not enlarge the document or trigger resize loops. */
+.viewer { height: max(260px, calc(100dvh - 218px)); max-height: 1000px; display: flex; align-items: center; justify-content: center; position: relative; overflow: clip; }
+#book { flex-shrink: 0; }
+.page { background: white; overflow: hidden; }
+/* Exports vary slightly in aspect ratio; fill the page to avoid white seams. */
+.page img { width: 100%; height: 100%; object-fit: fill; display: block; user-select: none; -webkit-user-drag: none; }
+.page-error { position: absolute; inset: 40% 12% auto; font-size: 14px; text-align: center; }
+.page-error[hidden] { display: none; }
+.page.failed img { visibility: hidden; }
+.page-error p { margin: 0 0 12px; }
+#message { position: absolute; max-width: 80%; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; font-size: 13px; color: #48564e; }
+/* Slow pages show a spinner, then a reassuring note if the download keeps going. */
+.spinner, .page.loading::before { width: 36px; height: 36px; border: 3px solid #d5dad4; border-top-color: var(--brand); border-radius: 50%; animation: spin .8s linear infinite; }
+.page.loading::before { content: ''; position: absolute; left: calc(50% - 18px); top: calc(50% - 32px); }
+.page.loading::after { content: 'Loading page…'; position: absolute; inset: calc(50% + 16px) 8% auto; text-align: center; font-size: 12px; color: #647169; animation: slow 0s 6s forwards; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slow { to { content: 'Slow connection, still loading…'; } }
+@media (prefers-reduced-motion: reduce) { .spinner, .page.loading::before { animation: pulse 1.6s ease-in-out infinite; } }
+@keyframes pulse { 50% { opacity: .35; } }
+#message[hidden] { display: none; }
+nav { display: flex; align-items: center; justify-content: center; gap: 28px; margin-top: 22px; }
+button, .button-link { border: 1px solid #b8c3bc; border-radius: 30px; background: transparent; color: inherit; padding: 12px 20px; min-height: 44px; font: inherit; font-size: 13px; cursor: pointer; }
+button:hover:enabled, .button-link:hover { color: white; background: #172526; border-color: #172526; }
+.button-link { display: inline-flex; align-items: center; text-decoration: none; white-space: nowrap; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+button:disabled { opacity: .35; cursor: default; }
+button:focus-visible, a:focus-visible { outline: 3px solid #347857; outline-offset: 4px; }
+output { min-width: 130px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; }
+.hint { margin: 16px 0 0; color: #647169; text-align: center; font-size: 11px; }
+@media (max-width: 600px) {
+  header { height: 60px; padding: 0 20px; }
+  .edition { display: none; }
+  main { position: relative; padding: 18px 12px 12px; }
+  .viewer { height: max(240px, calc(100dvh - 208px)); }
+  nav { gap: 14px; }
+  button, .button-link { padding: 10px 14px; }
+  button span { display: none; }
+  .hint { font-size: 10px; }
+}
+
+/* Local review notes sit above the book so pointing never turns a page. */
+.review-layer { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+.review-surface { position: absolute; pointer-events: auto; cursor: crosshair; }
+.review-surface:focus-visible { outline: 3px solid #347857; outline-offset: -3px; }
+.review-pin { position: absolute; transform: translate(-50%, -50%); border: 2px solid white; padding: 0; min-height: 34px; width: 34px; height: 34px; border-radius: 50%; background: #b74617; color: white; box-shadow: 0 2px 8px #0005; font-weight: bold; cursor: pointer; }
+.review-pin.resolved { background: #25704a; }
+#review-toggle { background: var(--brand); border-color: var(--brand); color: white; font-weight: bold; box-shadow: 0 2px 10px #336fae40; }
+#review-toggle[aria-pressed="true"] { background: #172526; border-color: #172526; box-shadow: none; }
+.review-dialog { position: fixed; margin: 0; width: min(340px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 20px; border: 1px solid #bec9c0; border-radius: 14px; box-shadow: 0 10px 40px #0003; color: #172526; background: #fff; }
+.review-dialog::backdrop { background: #17252620; }
+.review-dialog h2 { font-size: 16px; margin: 0 0 16px; }
+.review-dialog label { display: block; font-size: 13px; margin-bottom: 8px; }
+.review-dialog input, .review-dialog textarea { width: 100%; font: inherit; font-size: 16px; padding: 10px; border: 1px solid #87968b; border-radius: 6px; resize: vertical; }
+.note-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.note-actions button { padding: 8px 12px; }
+.note-actions [hidden] { display: none; }
+.note-error { font-size: 13px; color: #a32c17; }
+@media (max-width: 600px) { .brand span { display: none; } #review-toggle, .button-link { font-size: 12px; } .header-actions { gap: 6px; } }
+
+.review-refresh { display: block; margin: 10px auto 0; }
+.review-refresh[hidden] { display: none; }
+#note-details { margin: 12px 0; text-align: left; line-height: 1.5; }
+
+.catalog-intro { z-index: 1; position: absolute; left: var(--intro-left); top: var(--intro-top); width: var(--intro-width); max-height: var(--intro-height); overflow-y: auto; overscroll-behavior: contain; padding: 8px 36px 16px 8px; font-size: 14px; line-height: 1.6; }
+.catalog-intro[hidden] { display: none; }
+.catalog-intro h1 { margin: 0 0 18px; max-width: 440px; font-size: clamp(22px, 2vw, 30px); line-height: 1.2; letter-spacing: -.6px; }
+.catalog-intro h2 { margin: 22px 0 6px; font-size: 14px; line-height: 1.4; color: var(--brand); }
+.catalog-intro p { margin: 0; color: #48564e; }
+.catalog-intro ul { margin: 6px 0 0; padding-left: 20px; color: #48564e; }
+.catalog-intro li + li { margin-top: 7px; }
+.catalog-intro:focus-visible { outline: 2px solid #347857; outline-offset: -2px; }
+.portrait-layout .catalog-intro { position: static; width: auto; max-height: none; overflow: visible; padding: 8px 8px 28px; }
+
+.catalog-intro::-webkit-scrollbar { width: 6px; }
+.catalog-intro::-webkit-scrollbar-thumb { background: #abb7ae; border-radius: 6px; }
+.catalog-intro::-webkit-scrollbar-track { background: #e2e6df; }
